@@ -1,0 +1,12 @@
+[
+  "tests/test_cifar_ptb_data.py::submit_cifar10",
+  "tests/test_cifar_ptb_data.py::submit_ptb",
+  "tests/test_conv.py::submit_conv_forward",
+  "tests/test_conv.py::submit_conv_backward",
+  "tests/test_conv.py::submit_new_ops",
+  "tests/test_conv.py::submit_resnet9",
+  "tests/test_nd_backend.py::submit_new_nd_backend",
+  "tests/test_sequence_models.py::submit_rnn",
+  "tests/test_sequence_models.py::submit_lstm",
+  "tests/test_sequence_models.py::submit_language_model"
+]
