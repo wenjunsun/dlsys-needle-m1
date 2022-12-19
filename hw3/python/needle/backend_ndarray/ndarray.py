@@ -54,6 +54,14 @@ class BackendDevice:
         arr.fill(fill_value)
         return arr
 
+def m1():
+    """Return m1 gpu device"""
+    try:
+        from . import ndarray_backend_m1
+
+        return BackendDevice("m1", ndarray_backend_m1)
+    except ImportError:
+        return BackendDevice("m1", None)
 
 def cuda():
     """Return cuda device"""
