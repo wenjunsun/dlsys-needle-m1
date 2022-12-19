@@ -25,3 +25,16 @@ run the binary
 ```
 ./main.x
 ```
+The `main.cpp` program is pretty simple, as it constructs 3 buffers of length 3 for `a, b, c` (2 input buffers, 1 output buffer), and pass them into M1 GPU kernel for elemenwise addition, then print out results. The expected result is:
+```
+Running on Apple M1
+
+before add arrays (M1 GPU):
+a_CPP:1,1,1,
+b_CPP:2,3,4,
+c_CPP:0,0,0,
+after add arrays (M1 GPU):
+a_CPP:1,1,1,
+b_CPP:2,3,4,
+c_CPP:3,4,5,
+```
