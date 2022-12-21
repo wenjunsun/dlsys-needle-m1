@@ -2,9 +2,9 @@
 Final project for the class "Deep Learning Systems Algorithms and Implementation" from CMU, where we try to make needle work with Apple M1 chips.
 
 # directions to compile M1 code and run the trial program in `hw3/src/main.cpp`
-Go to the directory containing M1 code
+Go to the directory containing Makefile
 ```
-cd hw3/src
+cd hw3
 ```
 <!-- compile C++ metal code
 ```
