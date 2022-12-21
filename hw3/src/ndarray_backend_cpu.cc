@@ -45,39 +45,30 @@ void Fill(AlignedArray* out, scalar_t val) {
 }
 
 
-// returns whether indices are within the range of shape.
-// indices = [1, 2, 0] < shape = [3, 3, 1]
-bool isIndicesWithinShape(uint32_t indices[], std::vector<uint32_t>& shape) {
-  for (int i = 0; i < shape.size(); i++) {
-    if (indices[i] < shape[i]) {
-      continue;
-    } else {
-      return false;
-    }
+// given specification of an array in a matrix, and the index of the will be compact array,
+// return the index in the matrix that corresponds to this compact array index.
+size_t compact_to_non_compact_index(size_t compact_index, std::vector<int32_t>& shape, std::vector<int32_t>& strides, size_t offset) {
+  size_t num_dimensions = shape.size();
+  int32_t compact_strides[num_dimensions]; // compact_index = 12, shape = (3, 2, 5) -> matrix_indices = (1, 0, 2)
+  size_t dimension_prod = 1;
+  for (int i = num_dimensions - 1; i >= 0; i--) {
+    compact_strides[i] = dimension_prod;
+    dimension_prod *= shape[i];
   }
-  return true;
+  size_t result_index = offset;
+  size_t remainder = compact_index;
+  size_t dim_i_index;
+  for (size_t i = 0; i < shape.size(); i++) {
+    dim_i_index = remainder / compact_strides[i]; // the index in dimension i in matrix
+    remainder %= compact_strides[i];
+    result_index += dim_i_index * strides[i];
+  }
+  return result_index;
 }
 
-// increment an indices number represented as an array: indices = [1, 2, 0], shape = [3, 3, 1] -> arr = [2, 0, 0]
-// modify the indices parameter in place.
-// assume that indices have length = shape.size()
-void incrementIndicesWithShape(uint32_t indices[], std::vector<uint32_t>& shape) {
-  for (int i = shape.size() - 1; i >= 0 ; i--) {
-    indices[i] += 1;
-    // NOTE: need to have i != 0 here because we don't want a carry at the most significant index.
-    //       that is going to give resulting array like [0, 0, 0] at the final iteration, which
-    //       will cause infinite loop with our isIndicesWithinShape() checking code.
-    if (i != 0 && indices[i] == shape[i]) {
-      // there is a carry
-      indices[i] = 0;
-    } else {
-      break;
-    }
-  }
-}
 
-void Compact(const AlignedArray& a, AlignedArray* out, std::vector<uint32_t> shape,
-             std::vector<uint32_t> strides, size_t offset) {
+void Compact(const AlignedArray& a, AlignedArray* out, std::vector<int32_t> shape,
+             std::vector<int32_t> strides, size_t offset) {
   /**
    * Compact an array in memory
    *
@@ -93,22 +84,15 @@ void Compact(const AlignedArray& a, AlignedArray* out, std::vector<uint32_t> sha
    *  function will implement here, so we won't repeat this note.)
    */
   /// BEGIN YOUR SOLUTION
-  uint32_t indices[shape.size()] = {}; // this = {} notation means initialize array memories as 0
-  int cnt = 0;
-  while (isIndicesWithinShape(indices, shape)) {
-    size_t inputArrIndex = offset;
-    for (int i = 0; i < shape.size(); i++) {
-      inputArrIndex += indices[i] * strides[i];
-    }
-    out->ptr[cnt] = a.ptr[inputArrIndex];
-    cnt++;
-    incrementIndicesWithShape(indices, shape);
+  for (size_t compact_index = 0; compact_index < out->size; compact_index++) {
+    size_t a_index = compact_to_non_compact_index(compact_index, shape, strides, offset);
+    out->ptr[compact_index] = a.ptr[a_index];
   }
   /// END YOUR SOLUTION
 }
 
-void EwiseSetitem(const AlignedArray& a, AlignedArray* out, std::vector<uint32_t> shape,
-                  std::vector<uint32_t> strides, size_t offset) {
+void EwiseSetitem(const AlignedArray& a, AlignedArray* out, std::vector<int32_t> shape,
+                  std::vector<int32_t> strides, size_t offset) {
   /**
    * Set items in a (non-compact) array
    *
@@ -120,22 +104,15 @@ void EwiseSetitem(const AlignedArray& a, AlignedArray* out, std::vector<uint32_t
    *   offset: offset of the *out* array (not a, which has zero offset, being compact)
    */
   /// BEGIN YOUR SOLUTION
-  uint32_t indices[shape.size()] = {}; // this = {} notation means initialize array memories as 0
-  int cnt = 0;
-  while (isIndicesWithinShape(indices, shape)) {
-    size_t outputArrIndex = offset;
-    for (int i = 0; i < shape.size(); i++) {
-      outputArrIndex += indices[i] * strides[i];
-    }
-    out->ptr[outputArrIndex] = a.ptr[cnt];
-    cnt++;
-    incrementIndicesWithShape(indices, shape);
+  for (size_t compact_index = 0; compact_index < a.size; compact_index++) {
+    size_t out_index = compact_to_non_compact_index(compact_index, shape, strides, offset);
+    out->ptr[out_index] = a.ptr[compact_index];
   }
   /// END YOUR SOLUTION
 }
 
-void ScalarSetitem(const size_t size, scalar_t val, AlignedArray* out, std::vector<uint32_t> shape,
-                   std::vector<uint32_t> strides, size_t offset) {
+void ScalarSetitem(const size_t size, scalar_t val, AlignedArray* out, std::vector<int32_t> shape,
+                   std::vector<int32_t> strides, size_t offset) {
   /**
    * Set items is a (non-compact) array
    *
@@ -151,14 +128,9 @@ void ScalarSetitem(const size_t size, scalar_t val, AlignedArray* out, std::vect
    */
 
   /// BEGIN YOUR SOLUTION
-  uint32_t indices[shape.size()] = {}; // this = {} notation means initialize array memories as 0
-  while (isIndicesWithinShape(indices, shape)) {
-    size_t outputArrIndex = offset;
-    for (int i = 0; i < shape.size(); i++) {
-      outputArrIndex += indices[i] * strides[i];
-    }
-    out->ptr[outputArrIndex] = val;
-    incrementIndicesWithShape(indices, shape);
+  for (size_t compact_index = 0; compact_index < size; compact_index++) {
+    size_t out_index = compact_to_non_compact_index(compact_index, shape, strides, offset);
+    out->ptr[out_index] = val;
   }
   /// END YOUR SOLUTION
 }
