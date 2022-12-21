@@ -4,7 +4,11 @@ project(needle C CXX)
 # find correct version of Python
 execute_process(COMMAND python3-config --prefix
   OUTPUT_VARIABLE Python_ROOT_DIR)
-find_package(Python COMPONENTS Development Interpreter REQUIRED)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # added
+  find_package(Python3 3.10.9 EXACT COMPONENTS Development Interpreter REQUIRED) # or whatever python version is installed in conda env
+else()
+  find_package(Python COMPONENTS Development Interpreter REQUIRED)
+endif()
 include_directories(${Python_INCLUDE_DIRS})
 
 # find pybind
@@ -14,13 +18,22 @@ execute_process(COMMAND python3 -m pybind11 --cmakedir
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 find_package(pybind11 PATHS ${__pybind_path})
 
-
-if(NOT MSVC)
-  set(CMAKE_CXX_FLAGS "-std=c++11 -O2 ${CMAKE_CXX_FLAGS}")
-  set(CMAKE_CUDA_STANDARD 14)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # added
+  if(NOT MSVC)
+    set(CMAKE_CXX_FLAGS "-std=c++11 -O2 ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CUDA_STANDARD 14)
+  else()
+    set(CMAKE_CXX_FLAGS "/std:c++11 -O2 ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CUDA_STANDARD 14)
+  endif()
 else()
-  set(CMAKE_CXX_FLAGS "/std:c++11 -O2 ${CMAKE_CXX_FLAGS}")
-  set(CMAKE_CUDA_STANDARD 14)
+  if(NOT MSVC)
+    set(CMAKE_CXX_FLAGS "-std=c++11 -O2 -march=native ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CUDA_STANDARD 14)
+  else()
+    set(CMAKE_CXX_FLAGS "/std:c++11 -O2 -march=native ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CUDA_STANDARD 14)
+  endif()
 endif()
 
 include_directories(SYSTEM ${pybind11_INCLUDE_DIRS})
