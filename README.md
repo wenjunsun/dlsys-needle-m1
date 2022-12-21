@@ -6,7 +6,7 @@ Go to the directory containing M1 code
 ```
 cd hw3/src
 ```
-compile C++ metal code
+<!-- compile C++ metal code
 ```
 /opt/homebrew/opt/llvm/bin/clang++ \
     -std=c++17 -stdlib=libc++ -O2 \
@@ -20,9 +20,14 @@ Compile M1 GPU kernel code
 ```
 xcrun -sdk macosx metal -c ops.metal -o MyLibrary.air
 xcrun -sdk macosx metallib MyLibrary.air -o ops.metallib
+``` -->
+Compile C++ metal code && M1 GPU kernel code. All the object files and targets will be under `./build`.
 ```
-run the binary
+make
 ```
+Run the binary (Since currently the kernel library path is hardcoded, you need to run the binary under the same directory with the kernel library)
+```
+cd build
 ./main.x
 ```
 The `main.cpp` program is pretty simple, as it constructs 3 buffers of length 3 for `a, b, c` (2 input buffers, 1 output buffer), and pass them into M1 GPU kernel for elemenwise addition, then print out results. The expected result is:
