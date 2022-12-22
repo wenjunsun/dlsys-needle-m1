@@ -1,7 +1,7 @@
 # dlsys-needle-m1
 Final project for the class "Deep Learning Systems Algorithms and Implementation" from CMU, where we try to make needle work with Apple M1 chips.
 
-# directions to compile M1 code and run the trial program in `hw3/src/main.cpp`
+# Usage
 Go to the directory containing Makefile
 ```
 cd hw3
@@ -21,11 +21,15 @@ Compile M1 GPU kernel code
 xcrun -sdk macosx metal -c ops.metal -o MyLibrary.air
 xcrun -sdk macosx metallib MyLibrary.air -o ops.metallib
 ``` -->
-Compile C++ metal code && M1 GPU kernel code. All the object files and targets will be under `./build`.
+Compile C++ metal code && M1 GPU kernel code
 ```
 make
 ```
-Run the binary (Since currently the kernel library path is hardcoded, you need to run the binary under the same directory with the kernel library)
+Run unit tests for hw3 (Since currently the kernel library path is hardcoded, you need to execute the command under the same directory with the kernel library).
+```
+python3 -m pytest -k "ewise_add"
+```
+<!-- Run the binary 
 ```
 cd build
 ./main.x
@@ -42,4 +46,4 @@ after add arrays (M1 GPU):
 a_CPP:1,1,1,
 b_CPP:2,3,4,
 c_CPP:3,4,5,
-```
+``` -->
