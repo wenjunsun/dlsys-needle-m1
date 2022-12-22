@@ -16,6 +16,9 @@ A class to manage all of the Metal objects this app creates.
 
 #include "map"
 
+typedef float scalar_t;
+const size_t ELEM_SIZE = sizeof(scalar_t);
+
 class MetalOperations
 {
 public:
@@ -31,10 +34,12 @@ public:
                     size_t arrayLength,
                     const char *method);
 
-    void addArrays(MTL::Buffer *x_array,
-                   MTL::Buffer *y_array,
-                   MTL::Buffer *r_array,
-                   size_t arrayLength);
+    // Elementwise operations
+    void EwiseOp1(MTL::Buffer *a, MTL::Buffer *out, size_t arrayLength, const char *method);
+    void EwiseOp2(MTL::Buffer *a, MTL::Buffer *b, MTL::Buffer *out, size_t arrayLength, const char *method);
+
+    // Scalr operations
+    void ScalarOp(MTL::Buffer *a, scalar_t b, MTL::Buffer *out, size_t arrayLength, const char *method);
 
 private:
     std::map<std::string, MTL::Function *> functionMap;

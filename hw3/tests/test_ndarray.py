@@ -217,16 +217,6 @@ def test_ewise_fn(fn, shape, device):
 
 @pytest.mark.parametrize("shape", ewise_shapes)
 @pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda", "m1"])
-def test_ewise_add(shape, device):
-    _A = np.random.randn(*shape)
-    _B = np.random.randn(*shape)
-    A = nd.array(_A, device=nd.m1())
-    B = nd.array(_B, device=nd.m1())
-    np.testing.assert_allclose(_A + _B, (A + B).numpy(), atol=1e-5, rtol=1e-5)
-
-
-@pytest.mark.parametrize("shape", ewise_shapes)
-@pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda", "m1"])
 def test_ewise_max(shape, device):
     _A = np.random.randn(*shape)
     _B = np.random.randn(*shape)
@@ -327,6 +317,12 @@ def test_matmul(m, n, p, device):
     B = nd.array(_B, device=device)
     np.testing.assert_allclose((A @ B).numpy(), _A @ _B, rtol=1e-5, atol=1e-5)
 
+@pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda", "m1"])
+def test_scalar_add(device):
+    A = np.random.randn(5, 5)
+    B = nd.array(A, device=device)
+    np.testing.assert_allclose(A + 5., (B + 5.).numpy(), atol=1e-5, rtol=1e-5)
+
 
 @pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda", "m1"])
 def test_scalar_mul(device):
@@ -344,7 +340,7 @@ def test_scalar_div(device):
 
 @pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda", "m1"])
 def test_scalar_power(device):
-    A = np.random.randn(5, 5)
+    A = np.random.rand(5, 5)
     B = nd.array(A, device=device)
     np.testing.assert_allclose(np.power(A, 5.), (B**5.).numpy(), atol=1e-5, rtol=1e-5)
     np.testing.assert_allclose(np.power(A, 0.5), (B**0.5).numpy(), atol=1e-5, rtol=1e-5)

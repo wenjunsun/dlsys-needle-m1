@@ -93,15 +93,38 @@ void MetalOperations::Blocking1D(std::vector<MTL::Buffer *> buffers,
     commandBuffer->waitUntilCompleted();
 }
 
-void MetalOperations::addArrays(MTL::Buffer *x_array,
-                                MTL::Buffer *y_array,
-                                MTL::Buffer *r_array,
-                                size_t arrayLength)
+void MetalOperations::EwiseOp1(MTL::Buffer *a,
+                               MTL::Buffer *out,
+                               size_t arrayLength,
+                               const char *method)
 {
-    std::vector<MTL::Buffer *> buffers = {x_array,
-                                          y_array,
-                                          r_array};
-    const char *method = "add_arrays";
+    std::vector<MTL::Buffer *> buffers = {a, out};
+    Blocking1D(buffers, arrayLength, method);
+}
 
+void MetalOperations::EwiseOp2(MTL::Buffer *a,
+                               MTL::Buffer *b,
+                               MTL::Buffer *out,
+                               size_t arrayLength,
+                               const char *method)
+{
+    std::vector<MTL::Buffer *> buffers = {a, b, out};
+    Blocking1D(buffers, arrayLength, method);
+}
+
+void MetalOperations::ScalarOp(MTL::Buffer *a,
+                               scalar_t b,
+                               MTL::Buffer *out,
+                               size_t arrayLength,
+                               const char *method)
+{
+    // create a buffer to hold the scalar
+    auto scalar_buffer = _mDevice->newBuffer(ELEM_SIZE, MTL::ResourceStorageModeShared);
+    assert(scalar_buffer != nullptr);
+
+    // set the scalar value
+    *(scalar_t*)scalar_buffer->contents() = b;
+
+    std::vector<MTL::Buffer *> buffers = {a, scalar_buffer, out};
     Blocking1D(buffers, arrayLength, method);
 }

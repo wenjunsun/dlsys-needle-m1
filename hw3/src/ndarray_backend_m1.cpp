@@ -19,8 +19,9 @@ namespace m1 {
 
 #define ALIGNMENT 256
 #define TILE 8
-typedef float scalar_t;
-const size_t ELEM_SIZE = sizeof(scalar_t);
+
+// Load the metal library and initialize the MetalOperations object.  
+MetalOperations *MetalOps = new MetalOperations(MTL::CreateSystemDefaultDevice());
 
 // M1 is not like CUDA where we need to copy memory from CPU to GPU,
 // instead, M1 device has a shared buffer between CPU and GPU, and
@@ -34,6 +35,7 @@ struct M1Array {
 
     // get the M1 GPU device
     device = MTL::CreateSystemDefaultDevice();
+
     // create a buffer with (size * ELEM_SIZE) bytes that is shared between CPU and GPU.
     array_MTL = device->newBuffer(size * ELEM_SIZE, MTL::ResourceStorageModeShared);
     assert(array_MTL != nullptr);
@@ -51,7 +53,6 @@ struct M1Array {
 };
 
 
-
 void Fill(M1Array* out, scalar_t val) {
   for (int i = 0; i < out->size; i++) {
     out->ptr[i] = val;
@@ -59,16 +60,73 @@ void Fill(M1Array* out, scalar_t val) {
   //TODO: implement M1 GPU version here.
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Elementwise and scalar operations
+////////////////////////////////////////////////////////////////////////////////
+
 void EwiseAdd(const M1Array& a, const M1Array& b, M1Array* out) {
-  MetalOperations *arrayOps = new MetalOperations(out->device);
-  arrayOps->addArrays(a.array_MTL, b.array_MTL, out->array_MTL, out->size);
+  MetalOps->EwiseOp2(a.array_MTL, b.array_MTL, out->array_MTL, out->size, "ewise_add");
 }
 
 void ScalarAdd(const M1Array& a, scalar_t b, M1Array* out) {
-  MetalOperations *arrayOps = new MetalOperations(out->device);
-  // arrayOps->addArrays(a.array_MTL, b.array_MTL, out->array_MTL, out->size);
+  MetalOps->ScalarOp(a.array_MTL, b, out->array_MTL, out->size, "scalar_add");
 }
 
+void EwiseMul(const M1Array& a, const M1Array& b, M1Array* out) {
+  MetalOps->EwiseOp2(a.array_MTL, b.array_MTL, out->array_MTL, out->size, "ewise_mul");
+}
+
+void ScalarMul(const M1Array& a, scalar_t b, M1Array* out) {
+  MetalOps->ScalarOp(a.array_MTL, b, out->array_MTL, out->size, "scalar_mul");
+}
+
+void EwiseDiv(const M1Array& a, const M1Array& b, M1Array* out) {
+  MetalOps->EwiseOp2(a.array_MTL, b.array_MTL, out->array_MTL, out->size, "ewise_div");
+}
+
+void ScalarDiv(const M1Array& a, scalar_t b, M1Array* out) {
+  MetalOps->ScalarOp(a.array_MTL, b, out->array_MTL, out->size, "scalar_div");
+}
+
+void ScalarPower(const M1Array& a, scalar_t b, M1Array* out) {
+  MetalOps->ScalarOp(a.array_MTL, b, out->array_MTL, out->size, "scalar_power");
+}
+
+void EwiseMaximum(const M1Array& a, const M1Array& b, M1Array* out) {
+  MetalOps->EwiseOp2(a.array_MTL, b.array_MTL, out->array_MTL, out->size, "ewise_maximum");
+}
+
+void ScalarMaximum(const M1Array& a, scalar_t b, M1Array* out) {
+  MetalOps->ScalarOp(a.array_MTL, b, out->array_MTL, out->size, "scalar_maximum");
+}
+
+void EwiseEq(const M1Array& a, const M1Array& b, M1Array* out) {
+  MetalOps->EwiseOp2(a.array_MTL, b.array_MTL, out->array_MTL, out->size, "ewise_eq");
+}
+
+void ScalarEq(const M1Array& a, scalar_t b, M1Array* out) {
+  MetalOps->ScalarOp(a.array_MTL, b, out->array_MTL, out->size, "scalar_eq");
+}
+
+void EwiseGe(const M1Array& a, const M1Array& b, M1Array* out) {
+  MetalOps->EwiseOp2(a.array_MTL, b.array_MTL, out->array_MTL, out->size, "ewise_ge");
+}
+
+void ScalarGe(const M1Array& a, scalar_t b, M1Array* out) {
+  MetalOps->ScalarOp(a.array_MTL, b, out->array_MTL, out->size, "scalar_ge");
+}
+
+void EwiseLog(const M1Array& a, M1Array* out) {
+  MetalOps->EwiseOp1(a.array_MTL, out->array_MTL, out->size, "ewise_log");
+}
+
+void EwiseExp(const M1Array& a, M1Array* out) {
+  MetalOps->EwiseOp1(a.array_MTL, out->array_MTL, out->size, "ewise_exp");
+}
+
+void EwiseTanh(const M1Array& a, M1Array* out) {
+  MetalOps->EwiseOp1(a.array_MTL, out->array_MTL, out->size, "ewise_tanh");
+}
 
 } // namespace m1
 } // namespace needle
@@ -102,29 +160,29 @@ PYBIND11_MODULE(ndarray_backend_m1, m) {
     std::memcpy(out->ptr, a.request().ptr, out->size * ELEM_SIZE);
   });
 
-//   m.def("fill", Fill);
+  m.def("fill", Fill);
 //   m.def("compact", Compact);
 //   m.def("ewise_setitem", EwiseSetitem);
 //   m.def("scalar_setitem", ScalarSetitem);
+
   m.def("ewise_add", EwiseAdd);
   m.def("scalar_add", ScalarAdd);
+  m.def("ewise_mul", EwiseMul);
+  m.def("scalar_mul", ScalarMul);
+  m.def("ewise_div", EwiseDiv);
+  m.def("scalar_div", ScalarDiv);
+  m.def("scalar_power", ScalarPower);
 
-//   m.def("ewise_mul", EwiseMul);
-//   m.def("scalar_mul", ScalarMul);
-//   m.def("ewise_div", EwiseDiv);
-//   m.def("scalar_div", ScalarDiv);
-//   m.def("scalar_power", ScalarPower);
+  m.def("ewise_maximum", EwiseMaximum);
+  m.def("scalar_maximum", ScalarMaximum);
+  m.def("ewise_eq", EwiseEq);
+  m.def("scalar_eq", ScalarEq);
+  m.def("ewise_ge", EwiseGe);
+  m.def("scalar_ge", ScalarGe);
 
-//   m.def("ewise_maximum", EwiseMaximum);
-//   m.def("scalar_maximum", ScalarMaximum);
-//   m.def("ewise_eq", EwiseEq);
-//   m.def("scalar_eq", ScalarEq);
-//   m.def("ewise_ge", EwiseGe);
-//   m.def("scalar_ge", ScalarGe);
-
-//   m.def("ewise_log", EwiseLog);
-//   m.def("ewise_exp", EwiseExp);
-//   m.def("ewise_tanh", EwiseTanh);
+  m.def("ewise_log", EwiseLog);
+  m.def("ewise_exp", EwiseExp);
+  m.def("ewise_tanh", EwiseTanh);
 
 //   m.def("matmul", Matmul);
 //   m.def("matmul_tiled", MatmulTiled);
