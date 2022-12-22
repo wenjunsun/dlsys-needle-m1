@@ -34,6 +34,9 @@ public:
                     size_t arrayLength,
                     const char *method);
 
+    // Fill operation
+    void Fill(MTL::Buffer *out, scalar_t val, size_t arrayLength, const char *method);
+
     // Compact && Setitem operation
     void Compact(MTL::Buffer *a, MTL::Buffer *out, std::vector<int32_t> shape, std::vector<int32_t> strides,
                  size_t offset, size_t arrayLength, const char *method);
@@ -48,6 +51,8 @@ public:
 
     // Scalar operation
     void ScalarOp(MTL::Buffer *a, scalar_t b, MTL::Buffer *out, size_t arrayLength, const char *method);
+
+    // Matrix mulplication
 
     // Reduce operation
     void ReduceOp(MTL::Buffer *a, MTL::Buffer *out, size_t reduce_size, size_t arrayLength, const char *method);

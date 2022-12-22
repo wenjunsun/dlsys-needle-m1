@@ -117,6 +117,16 @@ void MetalOperations::Blocking1D(std::vector<MTL::Buffer *> buffers,
     commandBuffer->waitUntilCompleted();
 }
 
+void MetalOperations::Fill(MTL::Buffer *out,
+                           scalar_t val,
+                           size_t arrayLength,
+                           const char *method)
+{
+    auto val_buffer = ScalarToMTLBuffer(val, _mDevice);
+    std::vector<MTL::Buffer *> buffers = {out, val_buffer};
+    Blocking1D(buffers, arrayLength, method);
+}
+
 void MetalOperations::Compact(MTL::Buffer *a,
                               MTL::Buffer *out,
                               std::vector<int32_t> shape,
