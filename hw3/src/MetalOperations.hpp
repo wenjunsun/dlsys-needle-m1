@@ -27,11 +27,15 @@ public:
     MetalOperations(MTL::Device *device);
 
     // a wrapper method for using metal kernel for 1D operations.
-    // buffers = the buffers we pass into the M1 GPU. Usually we have 3 buffers: x, y, and return array.
-    // arrayLength = number of elements in each of the array we do computation on.
+    // buffers = the buffers we pass into the M1 GPU.
+    // arrayLength = number of elements in the array we do computation on.
     // method = name of the kernel method declared in ops.metal
     void Blocking1D(std::vector<MTL::Buffer *> buffers,
                     size_t arrayLength,
+                    const char *method);
+    void Blocking2D(std::vector<MTL::Buffer *> buffers,
+                    size_t rows,
+                    size_t columns,
                     const char *method);
 
     // Fill operation
@@ -53,6 +57,7 @@ public:
     void ScalarOp(MTL::Buffer *a, scalar_t b, MTL::Buffer *out, size_t arrayLength, const char *method);
 
     // Matrix mulplication
+    void MatMul(MTL::Buffer *a, MTL::Buffer *b, MTL::Buffer *out, uint32_t M, uint32_t N, uint32_t P, const char *method);
 
     // Reduce operation
     void ReduceOp(MTL::Buffer *a, MTL::Buffer *out, size_t reduce_size, size_t arrayLength, const char *method);

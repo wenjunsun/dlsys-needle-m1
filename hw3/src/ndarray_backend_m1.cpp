@@ -150,6 +150,9 @@ void EwiseTanh(const M1Array& a, M1Array* out) {
 ////////////////////////////////////////////////////////////////////////////////
 // Matrix mulplication
 ////////////////////////////////////////////////////////////////////////////////
+void Matmul(const M1Array& a, const M1Array& b, M1Array* out, uint32_t M, uint32_t N, uint32_t P) {
+  MetalOps->MatMul(a.array_MTL, b.array_MTL, out->array_MTL, M, N, P, "matmul");
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Max and sum reductions
@@ -220,7 +223,7 @@ PYBIND11_MODULE(ndarray_backend_m1, m) {
   m.def("ewise_exp", EwiseExp);
   m.def("ewise_tanh", EwiseTanh);
 
-//  m.def("matmul", Matmul);
+  m.def("matmul", Matmul);
 //   m.def("matmul_tiled", MatmulTiled);
 
   m.def("reduce_max", ReduceMax);

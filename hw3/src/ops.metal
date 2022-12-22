@@ -7,7 +7,7 @@ typedef float scalar_t;
 ////////////////////////////////////////////////////////////////////////////////
 // Fill operation
 ////////////////////////////////////////////////////////////////////////////////
-kernel void fill(device scalar_t* out [[buffer(0)]],
+kernel void fill(device scalar_t* out       [[buffer(0)]],
                  device const scalar_t* val [[buffer(1)]],
                  uint index                 [[thread_position_in_grid]])
 {
@@ -81,7 +81,7 @@ kernel void scalar_setitem(device scalar_t* out          [[buffer(0)]],
 kernel void ewise_add(device const scalar_t* a [[buffer(0)]],
                       device const scalar_t* b [[buffer(1)]],
                       device scalar_t* out     [[buffer(2)]],
-                      uint index            [[thread_position_in_grid]])
+                      uint index               [[thread_position_in_grid]])
 {
     out[index] = a[index] + b[index];
 }
@@ -197,11 +197,31 @@ kernel void ewise_exp(device const scalar_t* a [[buffer(0)]],
 }
 
 kernel void ewise_tanh(device const scalar_t* a [[buffer(0)]],
-                      device scalar_t* out      [[buffer(1)]],
-                      uint index             [[thread_position_in_grid]])
+                       device scalar_t* out     [[buffer(1)]],
+                       uint index               [[thread_position_in_grid]])
 {
     out[index] = tanh(a[index]);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Matrix mulplication
+////////////////////////////////////////////////////////////////////////////////
+
+kernel void matmul(device const scalar_t* a [[buffer(0)]],
+                   device const scalar_t* b [[buffer(1)]],
+                   device scalar_t* out     [[buffer(2)]],
+                   device const uint32_t* N [[buffer(3)]],
+                   device const uint32_t* P [[buffer(4)]],
+                   uint2 index              [[thread_position_in_grid]])
+{
+    int32_t i = index.x, j = index.y, n = (*N), p = (*P);
+
+    out[i * p + j] = 0;
+    for (int k = 0; k < n; k++) {
+      out[i * p + j] += a[i * n + k] * b[k * p + j];
+    }    
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Max and sum reductions
