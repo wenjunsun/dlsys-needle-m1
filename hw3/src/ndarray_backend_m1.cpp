@@ -35,7 +35,7 @@ struct M1Array {
     // get the M1 GPU device
     device = MTL::CreateSystemDefaultDevice();
     // create a buffer with (size * ELEM_SIZE) bytes that is shared between CPU and GPU.
-    array_MTL = device->newBuffer(size * ELEM_SIZE, MTL::ResourceStorageModeManaged);
+    array_MTL = device->newBuffer(size * ELEM_SIZE, MTL::ResourceStorageModeShared);
     assert(array_MTL != nullptr);
     
     // array_MTL->content() gets the C++ reference to the buffer shared with M1 GPU.
