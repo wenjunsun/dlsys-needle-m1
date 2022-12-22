@@ -29,9 +29,9 @@ int main(int argc, char *argv[])
     std::cout << "Running on " << device->name()->utf8String() << std::endl;
 
     // MTL buffers to hold data.
-    MTL::Buffer *a_MTL = device->newBuffer(bufferSize, MTL::ResourceStorageModeManaged);
-    MTL::Buffer *b_MTL = device->newBuffer(bufferSize, MTL::ResourceStorageModeManaged);
-    MTL::Buffer *c_MTL = device->newBuffer(bufferSize, MTL::ResourceStorageModeManaged);
+    MTL::Buffer *a_MTL = device->newBuffer(bufferSize, MTL::ResourceStorageModeShared);
+    MTL::Buffer *b_MTL = device->newBuffer(bufferSize, MTL::ResourceStorageModeShared);
+    MTL::Buffer *c_MTL = device->newBuffer(bufferSize, MTL::ResourceStorageModeShared);
 
     // Get a C++-style reference to the buffer
     auto a_CPP = (float *)a_MTL->contents();
