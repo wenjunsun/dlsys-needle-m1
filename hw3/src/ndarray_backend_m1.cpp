@@ -42,7 +42,7 @@ struct M1Array {
     ptr = (scalar_t*) array_MTL->contents();
     this->size = size;
   }
-  ~M1Array() { free(ptr); }
+  ~M1Array() {}
   size_t ptr_as_int() {return (size_t)ptr; }
   scalar_t* ptr;
   size_t size;
@@ -63,6 +63,12 @@ void EwiseAdd(const M1Array& a, const M1Array& b, M1Array* out) {
   MetalOperations *arrayOps = new MetalOperations(out->device);
   arrayOps->addArrays(a.array_MTL, b.array_MTL, out->array_MTL, out->size);
 }
+
+void ScalarAdd(const M1Array& a, scalar_t b, M1Array* out) {
+  MetalOperations *arrayOps = new MetalOperations(out->device);
+  // arrayOps->addArrays(a.array_MTL, b.array_MTL, out->array_MTL, out->size);
+}
+
 
 } // namespace m1
 } // namespace needle
@@ -101,7 +107,7 @@ PYBIND11_MODULE(ndarray_backend_m1, m) {
 //   m.def("ewise_setitem", EwiseSetitem);
 //   m.def("scalar_setitem", ScalarSetitem);
   m.def("ewise_add", EwiseAdd);
-//   m.def("scalar_add", ScalarAdd);
+  m.def("scalar_add", ScalarAdd);
 
 //   m.def("ewise_mul", EwiseMul);
 //   m.def("scalar_mul", ScalarMul);

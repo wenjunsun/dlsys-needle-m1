@@ -5,7 +5,7 @@ project(needle C CXX)
 execute_process(COMMAND python3-config --prefix
   OUTPUT_VARIABLE Python_ROOT_DIR)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # added
-  find_package(Python3 3.10.9 EXACT COMPONENTS Development Interpreter REQUIRED) # or whatever python version is installed in conda env
+  find_package(Python3 3.9.12 EXACT COMPONENTS Development Interpreter REQUIRED) # or whatever python version is installed in conda env
 else()
   find_package(Python COMPONENTS Development Interpreter REQUIRED)
 endif()
@@ -38,8 +38,6 @@ endif()
 
 include_directories(SYSTEM ${pybind11_INCLUDE_DIRS})
 list(APPEND LINKER_LIBS ${pybind11_LIBRARIES})
-
-
 ###################
 ### CPU BACKEND ###
 ###################
@@ -60,6 +58,32 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_property(TARGET ndarray_backend_cpu PROPERTY LINK_OPTIONS -undefined dynamic_lookup)
 endif()
 
+
+###################
+### M1 BACKEND ###
+###################
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+  find_library(METAL Metal)
+  find_library(FOUNDATION Foundation)
+  find_library(METALKIT MetalKit)
+  add_library(ndarray_backend_m1 MODULE src/ndarray_backend_m1.cpp src/MetalOperations.cpp src/MetalOperations.hpp)
+  target_include_directories(ndarray_backend_m1 PRIVATE ../metal-cpp)
+  target_link_libraries(ndarray_backend_m1 PUBLIC ${LINKER_LIBS} ${METAL} ${FOUNDATION} ${METALKIT})
+  target_compile_options(ndarray_backend_m1 PRIVATE -std=c++17 -stdlib=libc++ -O2 -fno-objc-arc)
+  pybind11_extension(ndarray_backend_m1)
+  pybind11_strip(ndarray_backend_m1)
+
+
+  # directly output to ffi folder
+  set_target_properties(ndarray_backend_m1
+    PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python/needle/backend_ndarray
+    CXX_VISIBILITY_PRESET "hidden"
+  )
+
+  set_property(TARGET ndarray_backend_m1 PROPERTY LINK_OPTIONS -undefined dynamic_lookup)
+endif()
 
 
 ####################
@@ -97,4 +121,3 @@ if(CUDA_FOUND)
 )
 
 endif()
-
