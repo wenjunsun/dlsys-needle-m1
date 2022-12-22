@@ -64,6 +64,8 @@ endif()
 ###################
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
+  set(ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+  add_definitions(-D_PROJECT_ROOT_PATH=\"${ROOT_DIR}\")
   find_library(METAL Metal)
   find_library(FOUNDATION Foundation)
   find_library(METALKIT MetalKit)

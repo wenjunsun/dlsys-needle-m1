@@ -6,6 +6,11 @@
 #include <map>
 #include <vector>
 
+#ifdef _PROJECT_ROOT_PATH
+    #define CUR_ROOT_DIR _PROJECT_ROOT_PATH
+#else
+    #define CUR_ROOT_DIR "./"
+#endif
 
 template<class T>
 MTL::Buffer* ScalarToMTLBuffer(T scalar, MTL::Device *device)
@@ -38,7 +43,11 @@ MetalOperations::MetalOperations(MTL::Device *device)
     NS::Error *error = nullptr;
 
     // Load the shader files with a .metal file extension in the project
-    auto filepath = NS::String::string("./ops.metallib", NS::ASCIIStringEncoding);
+    std::string s1 = CUR_ROOT_DIR;
+    std::string s2 = "/python/needle/backend_ndarray/";
+    std::string s3 = "ops.metallib";
+    std::string libpath = s1 + s2 + s3;
+    auto filepath = NS::String::string(libpath.c_str(), NS::ASCIIStringEncoding);
     MTL::Library *opLibrary = _mDevice->newLibrary(filepath, &error);
 
     if (opLibrary == nullptr)

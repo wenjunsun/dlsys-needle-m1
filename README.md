@@ -25,7 +25,7 @@ Compile C++ metal code && M1 GPU kernel code
 ```
 make
 ```
-Run unit tests for M1 (Since currently the kernel library path is hardcoded, you need to execute the command under the same directory with the kernel library).
+Run unit tests for M1 (Since currently we add `./python` to `sys.path` in pytest, you need to execute the command under project root e.g hw3, but you can add other paths as well)
 ```
 python3 -m pytest -k "m1"
 ```

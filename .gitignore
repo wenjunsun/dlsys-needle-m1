@@ -1,5 +1,6 @@
 # Project-specific files
 *.metallib
+*.air
 # Mac's index file shouldn't be checked into git.
 .DS_Store
 
