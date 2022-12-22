@@ -6,6 +6,30 @@
 #include <map>
 #include <vector>
 
+
+template<class T>
+MTL::Buffer* ScalarToMTLBuffer(T scalar, MTL::Device *device)
+{
+    MTL::Buffer *buffer = device->newBuffer(sizeof(T), MTL::ResourceStorageModeShared);
+    assert(buffer != nullptr);
+    auto bufferPtr = (T*)buffer->contents();
+    *bufferPtr = scalar;
+    return buffer;
+}
+
+template<class T>
+MTL::Buffer* VecToMTLBuffer(std::vector<T> vec, MTL::Device *device)
+{
+    MTL::Buffer *buffer = device->newBuffer(vec.size() * sizeof(T), MTL::ResourceStorageModeShared);
+    assert(buffer != nullptr);
+    auto bufferPtr = (T*)buffer->contents();
+    for (int i = 0; i < vec.size(); i++)
+    {
+        bufferPtr[i] = vec[i];
+    }
+    return buffer;
+}
+
 MetalOperations::MetalOperations(MTL::Device *device)
 {
 
@@ -93,6 +117,56 @@ void MetalOperations::Blocking1D(std::vector<MTL::Buffer *> buffers,
     commandBuffer->waitUntilCompleted();
 }
 
+void MetalOperations::Compact(MTL::Buffer *a,
+                              MTL::Buffer *out,
+                              std::vector<int32_t> shape,
+                              std::vector<int32_t> strides,
+                              size_t offset,
+                              size_t arrayLength,
+                              const char *method)
+{
+    auto shape_buffer = VecToMTLBuffer(shape, _mDevice);
+    auto strides_buffer = VecToMTLBuffer(strides, _mDevice);
+    auto dim_buffer = ScalarToMTLBuffer(shape.size(), _mDevice);
+    auto offset_buffer = ScalarToMTLBuffer(offset, _mDevice);
+    std::vector<MTL::Buffer *> buffers = {a, out, shape_buffer, strides_buffer, dim_buffer, offset_buffer};
+    Blocking1D(buffers, arrayLength, method);
+}
+
+void MetalOperations::EwiseSetitem(MTL::Buffer *a,
+                                   MTL::Buffer *out,
+                                   std::vector<int32_t> shape,
+                                   std::vector<int32_t> strides,
+                                   size_t offset,
+                                   size_t arrayLength,
+                                   const char *method)
+{
+    auto shape_buffer = VecToMTLBuffer(shape, _mDevice);
+    auto strides_buffer = VecToMTLBuffer(strides, _mDevice);
+    auto dim_buffer = ScalarToMTLBuffer(shape.size(), _mDevice);
+    auto offset_buffer = ScalarToMTLBuffer(offset, _mDevice);
+    std::vector<MTL::Buffer *> buffers = {a, out, shape_buffer, strides_buffer, dim_buffer, offset_buffer};
+    Blocking1D(buffers, arrayLength, method);
+}
+
+void MetalOperations::ScalarSetitem(MTL::Buffer *out,
+                                    scalar_t val,
+                                    std::vector<int32_t> shape,
+                                    std::vector<int32_t> strides,
+                                    size_t offset,
+                                    size_t arrayLength,
+                                    const char *method)
+{
+    auto val_buffer = ScalarToMTLBuffer(val, _mDevice);
+    auto shape_buffer = VecToMTLBuffer(shape, _mDevice);
+    auto strides_buffer = VecToMTLBuffer(strides, _mDevice);
+    auto dim_buffer = ScalarToMTLBuffer(shape.size(), _mDevice);
+    auto offset_buffer = ScalarToMTLBuffer(offset, _mDevice);
+    std::vector<MTL::Buffer *> buffers = {out, val_buffer, shape_buffer, strides_buffer, dim_buffer, offset_buffer};
+    Blocking1D(buffers, arrayLength, method);
+}
+
+
 void MetalOperations::EwiseOp1(MTL::Buffer *a,
                                MTL::Buffer *out,
                                size_t arrayLength,
@@ -118,13 +192,7 @@ void MetalOperations::ScalarOp(MTL::Buffer *a,
                                size_t arrayLength,
                                const char *method)
 {
-    // create a buffer to hold the scalar
-    auto scalar_buffer = _mDevice->newBuffer(ELEM_SIZE, MTL::ResourceStorageModeShared);
-    assert(scalar_buffer != nullptr);
-
-    // set the scalar value
-    *(scalar_t*)scalar_buffer->contents() = b;
-
+    auto scalar_buffer = ScalarToMTLBuffer(b, _mDevice);
     std::vector<MTL::Buffer *> buffers = {a, scalar_buffer, out};
     Blocking1D(buffers, arrayLength, method);
 }
@@ -136,13 +204,7 @@ void MetalOperations::ReduceOp(MTL::Buffer *a,
                                size_t arrayLength,
                                const char *method)
 {
-    // create a buffer to hold the scalar
-    auto reduce_size_buffer = _mDevice->newBuffer(sizeof(size_t), MTL::ResourceStorageModeShared);
-    assert(reduce_size_buffer != nullptr);
-
-    // set the scalar value
-    *(size_t*)reduce_size_buffer->contents() = reduce_size;
-
+    auto reduce_size_buffer = ScalarToMTLBuffer(reduce_size, _mDevice);
     std::vector<MTL::Buffer *> buffers = {a, out, reduce_size_buffer};
     Blocking1D(buffers, arrayLength, method);
 }

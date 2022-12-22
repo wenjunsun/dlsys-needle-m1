@@ -61,6 +61,25 @@ void Fill(M1Array* out, scalar_t val) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Compact and setitem cals
+////////////////////////////////////////////////////////////////////////////////
+
+void Compact(const M1Array& a, M1Array* out, std::vector<int32_t> shape,
+             std::vector<int32_t> strides, size_t offset) {
+  MetalOps->Compact(a.array_MTL, out->array_MTL, shape, strides, offset, out->size, "compact");
+}
+
+void EwiseSetitem(const M1Array& a, M1Array* out, std::vector<int32_t> shape,
+                  std::vector<int32_t> strides, size_t offset) {
+  MetalOps->EwiseSetitem(a.array_MTL, out->array_MTL, shape, strides, offset, a.size, "ewise_setitem");
+}
+
+void ScalarSetitem(size_t size, scalar_t val, M1Array* out, std::vector<int32_t> shape,
+                   std::vector<int32_t> strides, size_t offset) {
+  MetalOps->ScalarSetitem(out->array_MTL, val, shape, strides, offset, size, "scalar_setitem");
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Elementwise and scalar operations
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -174,9 +193,9 @@ PYBIND11_MODULE(ndarray_backend_m1, m) {
   });
 
   m.def("fill", Fill);
-//   m.def("compact", Compact);
-//   m.def("ewise_setitem", EwiseSetitem);
-//   m.def("scalar_setitem", ScalarSetitem);
+  m.def("compact", Compact);
+  m.def("ewise_setitem", EwiseSetitem);
+  m.def("scalar_setitem", ScalarSetitem);
 
   m.def("ewise_add", EwiseAdd);
   m.def("scalar_add", ScalarAdd);
