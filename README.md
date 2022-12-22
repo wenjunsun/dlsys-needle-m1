@@ -25,9 +25,9 @@ Compile C++ metal code && M1 GPU kernel code
 ```
 make
 ```
-Run unit tests for hw3 (Since currently the kernel library path is hardcoded, you need to execute the command under the same directory with the kernel library).
+Run unit tests for M1 (Since currently the kernel library path is hardcoded, you need to execute the command under the same directory with the kernel library).
 ```
-python3 -m pytest -k "ewise_add"
+python3 -m pytest -k "m1"
 ```
 <!-- Run the binary 
 ```

@@ -318,6 +318,15 @@ def test_matmul(m, n, p, device):
     np.testing.assert_allclose((A @ B).numpy(), _A @ _B, rtol=1e-5, atol=1e-5)
 
 @pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda", "m1"])
+def test_fill(device):
+    A = np.random.randn(5, 5)
+    B = nd.array(A, device=device)
+    A.fill(5)
+    B.fill(5)
+    np.testing.assert_allclose(A, B.numpy(), atol=1e-5, rtol=1e-5)
+
+
+@pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda", "m1"])
 def test_scalar_add(device):
     A = np.random.randn(5, 5)
     B = nd.array(A, device=device)
