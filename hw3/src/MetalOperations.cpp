@@ -128,3 +128,21 @@ void MetalOperations::ScalarOp(MTL::Buffer *a,
     std::vector<MTL::Buffer *> buffers = {a, scalar_buffer, out};
     Blocking1D(buffers, arrayLength, method);
 }
+
+
+void MetalOperations::ReduceOp(MTL::Buffer *a,
+                               MTL::Buffer *out,
+                               size_t reduce_size,
+                               size_t arrayLength,
+                               const char *method)
+{
+    // create a buffer to hold the scalar
+    auto reduce_size_buffer = _mDevice->newBuffer(sizeof(size_t), MTL::ResourceStorageModeShared);
+    assert(reduce_size_buffer != nullptr);
+
+    // set the scalar value
+    *(size_t*)reduce_size_buffer->contents() = reduce_size;
+
+    std::vector<MTL::Buffer *> buffers = {a, out, reduce_size_buffer};
+    Blocking1D(buffers, arrayLength, method);
+}

@@ -128,6 +128,19 @@ void EwiseTanh(const M1Array& a, M1Array* out) {
   MetalOps->EwiseOp1(a.array_MTL, out->array_MTL, out->size, "ewise_tanh");
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Max and sum reductions
+////////////////////////////////////////////////////////////////////////////////
+void ReduceMax(const M1Array& a, M1Array* out, size_t reduce_size) {
+  MetalOps->ReduceOp(a.array_MTL, out->array_MTL, reduce_size, out->size, "reduce_max");
+}
+
+void ReduceSum(const M1Array& a, M1Array* out, size_t reduce_size) {
+  MetalOps->ReduceOp(a.array_MTL, out->array_MTL, reduce_size, out->size, "reduce_sum");
+}
+
+
+
 } // namespace m1
 } // namespace needle
 
@@ -187,6 +200,6 @@ PYBIND11_MODULE(ndarray_backend_m1, m) {
 //   m.def("matmul", Matmul);
 //   m.def("matmul_tiled", MatmulTiled);
 
-//   m.def("reduce_max", ReduceMax);
-//   m.def("reduce_sum", ReduceSum);
+  m.def("reduce_max", ReduceMax);
+  m.def("reduce_sum", ReduceSum);
 }

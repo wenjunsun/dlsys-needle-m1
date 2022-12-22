@@ -34,12 +34,15 @@ public:
                     size_t arrayLength,
                     const char *method);
 
-    // Elementwise operations
+    // Elementwise operation
     void EwiseOp1(MTL::Buffer *a, MTL::Buffer *out, size_t arrayLength, const char *method);
     void EwiseOp2(MTL::Buffer *a, MTL::Buffer *b, MTL::Buffer *out, size_t arrayLength, const char *method);
 
-    // Scalr operations
+    // Scalar operation
     void ScalarOp(MTL::Buffer *a, scalar_t b, MTL::Buffer *out, size_t arrayLength, const char *method);
+
+    // Reduce operation
+    void ReduceOp(MTL::Buffer *a, MTL::Buffer *out, size_t reduce_size, size_t arrayLength, const char *method);
 
 private:
     std::map<std::string, MTL::Function *> functionMap;
