@@ -1,6 +1,17 @@
 # MetalNeedle: M1 backend for an education deep learning framework Needle
 Final project for the class "Deep Learning Systems Algorithms and Implementation" from CMU, where we try to make needle work with Apple M1 chips.
 
+# Install dependencies
+I used conda for installing all the python packages needed for running unit tests in this codebase. After installing conda on your system, run the following to install the conda environment needed for our code.
+```
+conda env create --file environment.yaml
+```
+Run the following to activate the environment
+```
+conda activate dlsys-needle-m1
+```
+If you want, you can also use pip to install all the packages listed in `environment.yml` and not use conda.
+
 # Usage
 Go to the directory containing Makefile
 ```
