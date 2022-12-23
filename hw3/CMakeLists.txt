@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.19)
 project(needle C CXX)
 
 # find correct version of Python
 execute_process(COMMAND python3-config --prefix
   OUTPUT_VARIABLE Python_ROOT_DIR)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # added
-  find_package(Python3 3.9.12 EXACT COMPONENTS Development Interpreter REQUIRED) # or whatever python version is installed in conda env
+  find_package(Python3 COMPONENTS Development Interpreter REQUIRED) # or whatever python version is installed in conda env
 else()
   find_package(Python COMPONENTS Development Interpreter REQUIRED)
 endif()
