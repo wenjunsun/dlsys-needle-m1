@@ -1,0 +1,7 @@
+name: dlsys-needle-m1
+dependencies:
+  - python=3.10.8
+  - numpy
+  - pybind11
+  - pytest
+  - pytorch
