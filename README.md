@@ -58,6 +58,8 @@ python3 download_data.py
 
 # Usage
 
+## Run unit tests from hw3 and hw4, now with M1 as backend.
+
 Go to the directory containing Makefile
 
 ```
@@ -111,21 +113,19 @@ Run the following to test language model training on M1 (for some reason it fail
 python3 -m pytest -v -k "test_language_model_training and m1"
 ```
 
-<!-- Run the binary
-```
-cd build
-./main.x
-```
-The `main.cpp` program is pretty simple, as it constructs 3 buffers of length 3 for `a, b, c` (2 input buffers, 1 output buffer), and pass them into M1 GPU kernel for elemenwise addition, then print out results. The expected result is:
-```
-Running on Apple M1
+## benchmark matrix multiplication on CPU vs M1
 
-before add arrays (M1 GPU):
-a_CPP:1,1,1,
-b_CPP:2,3,4,
-c_CPP:0,0,0,
-after add arrays (M1 GPU):
-a_CPP:1,1,1,
-b_CPP:2,3,4,
-c_CPP:3,4,5,
-``` -->
+```
+cd hw4
+python3 benchmark_matmul.py
+```
+
+You should see something like the following
+
+```
+for matmul with parameters: {'m': 4000, 'n': 4000, 'p': 4000, 'device': cpu()}
+it takes 4.8514 seconds to do matrix multiplication
+
+for matmul with parameters: {'m': 4000, 'n': 4000, 'p': 4000, 'device': m1()}
+it takes 1.9572 seconds to do matrix multiplication
+```
