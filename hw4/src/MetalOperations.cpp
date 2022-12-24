@@ -124,6 +124,9 @@ void MetalOperations::Blocking1D(std::vector<MTL::Buffer *> buffers,
 
     commandBuffer->commit();
     commandBuffer->waitUntilCompleted();
+    
+    commandBuffer->release();
+    computeEncoder->release();
 }
 
 void MetalOperations::Blocking2D(std::vector<MTL::Buffer *> buffers,
@@ -160,6 +163,9 @@ void MetalOperations::Blocking2D(std::vector<MTL::Buffer *> buffers,
 
     commandBuffer->commit();
     commandBuffer->waitUntilCompleted();
+
+    commandBuffer->release();
+    computeEncoder->release();
 }
 
 void MetalOperations::Fill(MTL::Buffer *out,
@@ -170,6 +176,7 @@ void MetalOperations::Fill(MTL::Buffer *out,
     auto val_buffer = ScalarToMTLBuffer(val, _mDevice);
     std::vector<MTL::Buffer *> buffers = {out, val_buffer};
     Blocking1D(buffers, arrayLength, method);
+    val_buffer->release();
 }
 
 void MetalOperations::Compact(MTL::Buffer *a,
@@ -186,6 +193,10 @@ void MetalOperations::Compact(MTL::Buffer *a,
     auto offset_buffer = ScalarToMTLBuffer(offset, _mDevice);
     std::vector<MTL::Buffer *> buffers = {a, out, shape_buffer, strides_buffer, dim_buffer, offset_buffer};
     Blocking1D(buffers, arrayLength, method);
+    shape_buffer->release();
+    strides_buffer->release();
+    dim_buffer->release();
+    offset_buffer->release();
 }
 
 void MetalOperations::EwiseSetitem(MTL::Buffer *a,
@@ -202,6 +213,10 @@ void MetalOperations::EwiseSetitem(MTL::Buffer *a,
     auto offset_buffer = ScalarToMTLBuffer(offset, _mDevice);
     std::vector<MTL::Buffer *> buffers = {a, out, shape_buffer, strides_buffer, dim_buffer, offset_buffer};
     Blocking1D(buffers, arrayLength, method);
+    shape_buffer->release();
+    strides_buffer->release();
+    dim_buffer->release();
+    offset_buffer->release();
 }
 
 void MetalOperations::ScalarSetitem(MTL::Buffer *out,
@@ -219,6 +234,11 @@ void MetalOperations::ScalarSetitem(MTL::Buffer *out,
     auto offset_buffer = ScalarToMTLBuffer(offset, _mDevice);
     std::vector<MTL::Buffer *> buffers = {out, val_buffer, shape_buffer, strides_buffer, dim_buffer, offset_buffer};
     Blocking1D(buffers, arrayLength, method);
+    val_buffer->release();
+    shape_buffer->release();
+    strides_buffer->release();
+    dim_buffer->release();
+    offset_buffer->release();
 }
 
 
@@ -250,6 +270,7 @@ void MetalOperations::ScalarOp(MTL::Buffer *a,
     auto scalar_buffer = ScalarToMTLBuffer(b, _mDevice);
     std::vector<MTL::Buffer *> buffers = {a, scalar_buffer, out};
     Blocking1D(buffers, arrayLength, method);
+    scalar_buffer->release();
 }
 
 
@@ -262,6 +283,7 @@ void MetalOperations::ReduceOp(MTL::Buffer *a,
     auto reduce_size_buffer = ScalarToMTLBuffer(reduce_size, _mDevice);
     std::vector<MTL::Buffer *> buffers = {a, out, reduce_size_buffer};
     Blocking1D(buffers, arrayLength, method);
+    reduce_size_buffer->release();
 }
 
 
@@ -277,4 +299,6 @@ void MetalOperations::MatMul(MTL::Buffer *a,
     auto P_buffer = ScalarToMTLBuffer(P, _mDevice);
     std::vector<MTL::Buffer *> buffers = {a, b, out, N_buffer, P_buffer};
     Blocking2D(buffers, M, P, method);
+    N_buffer->release();
+    P_buffer->release();
 }

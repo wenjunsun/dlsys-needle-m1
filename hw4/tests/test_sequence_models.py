@@ -26,9 +26,9 @@ _DEVICES = [nd.cpu(),
 # BATCH_SIZES = [1, 15]
 # INPUT_SIZES = [1, 11]
 # HIDDEN_SIZES = [1, 12]
-BATCH_SIZES = [1, 2]
-INPUT_SIZES = [1, 3]
-HIDDEN_SIZES = [1, 2]
+BATCH_SIZES = [1, 15]
+INPUT_SIZES = [1, 5]
+HIDDEN_SIZES = [1, 6]
 BIAS = [True, False]
 INIT_HIDDEN = [True, False]
 NONLINEARITIES = ['tanh', 'relu']
@@ -104,7 +104,7 @@ def test_lstm_cell(batch_size, input_size, hidden_size, bias, init_hidden, devic
 
 
 # SEQ_LENGTHS = [1, 13]
-SEQ_LENGTHS = [1, 3]
+SEQ_LENGTHS = [1, 6]
 NUM_LAYERS = [1, 2]
 @pytest.mark.parametrize("seq_length", SEQ_LENGTHS)
 @pytest.mark.parametrize("num_layers", NUM_LAYERS)
@@ -187,8 +187,7 @@ def test_lstm(seq_length, num_layers, batch_size, input_size, hidden_size, bias,
 
 OUTPUT_SIZES = [1, 1000]
 EMBEDDING_SIZES = [1, 34]
-# SEQ_MODEL = ['rnn', 'lstm']
-SEQ_MODEL = ['rnn']
+SEQ_MODEL = ['rnn', 'lstm']
 @pytest.mark.parametrize("seq_length", SEQ_LENGTHS)
 @pytest.mark.parametrize("num_layers", NUM_LAYERS)
 @pytest.mark.parametrize("batch_size", BATCH_SIZES)
@@ -228,27 +227,30 @@ def test_language_model_implementation(seq_length, num_layers, batch_size, embed
     for p in model.parameters():
         assert p.grad is not None
 
-@pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda", "m1"])
-def test_language_model_training(device):
-    np.random.seed(0)
-    corpus = ndl.data.Corpus("data/ptb", max_lines=20)
-    seq_len = 10
-    num_examples = 100
-    batch_size = 16
-    seq_model = 'rnn'
-    num_layers = 2
-    hidden_size = 10
-    n_epochs=2
-    train_data = ndl.data.batchify(corpus.train, batch_size=batch_size, device=device, dtype="float32")
-    model = LanguageModel(30, len(corpus.dictionary), hidden_size=hidden_size, num_layers=num_layers, seq_model=seq_model, device=device)
-    train_acc, train_loss = train_ptb(model, train_data, seq_len=seq_len, n_epochs=n_epochs, device=device)
-    test_acc, test_loss = evaluate_ptb(model, train_data, seq_len=seq_len, device=device)
-    if str(device) == "cpu()":
-        np.testing.assert_allclose(5.711512, train_loss, atol=1e-5, rtol=1e-5)
-        np.testing.assert_allclose(5.388685, test_loss, atol=1e-5, rtol=1e-5)
-    elif str(device) == "cuda()":
-        np.testing.assert_allclose(5.711512, train_loss, atol=1e-5, rtol=1e-5)
-        np.testing.assert_allclose(5.388685, test_loss, atol=1e-5, rtol=1e-5)
+# @pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda", "m1"])
+# def test_language_model_training(device):
+#     np.random.seed(0)
+#     corpus = ndl.data.Corpus("data/ptb", max_lines=20)
+#     seq_len = 10
+#     num_examples = 100
+#     batch_size = 16
+#     seq_model = 'rnn'
+#     num_layers = 2
+#     hidden_size = 10
+#     n_epochs=2
+#     train_data = ndl.data.batchify(corpus.train, batch_size=batch_size, device=device, dtype="float32")
+#     model = LanguageModel(30, len(corpus.dictionary), hidden_size=hidden_size, num_layers=num_layers, seq_model=seq_model, device=device)
+#     train_acc, train_loss = train_ptb(model, train_data, seq_len=seq_len, n_epochs=n_epochs, device=device)
+#     test_acc, test_loss = evaluate_ptb(model, train_data, seq_len=seq_len, device=device)
+#     if str(device) == "cpu()":
+#         np.testing.assert_allclose(5.711512, train_loss, atol=1e-5, rtol=1e-5)
+#         np.testing.assert_allclose(5.388685, test_loss, atol=1e-5, rtol=1e-5)
+#     elif str(device) == "cuda()":
+#         np.testing.assert_allclose(5.711512, train_loss, atol=1e-5, rtol=1e-5)
+#         np.testing.assert_allclose(5.388685, test_loss, atol=1e-5, rtol=1e-5)
+#     elif str(device) == "m1()":
+#         np.testing.assert_allclose(5.711512, train_loss, atol=1e-5, rtol=1e-5)
+#         np.testing.assert_allclose(5.388685, test_loss, atol=1e-5, rtol=1e-5)
 
 
 

@@ -39,7 +39,7 @@ struct M1Array {
     ptr = (scalar_t*) array_MTL->contents();
     this->size = size;
   }
-  ~M1Array() {}
+  ~M1Array() {array_MTL->release();}
   size_t ptr_as_int() {return (size_t)ptr; }
   scalar_t* ptr;
   size_t size;
