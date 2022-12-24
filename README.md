@@ -8,7 +8,7 @@ To run the code in this repo (with M1 as NDArray backend), we assume you have a 
 
 ## Step 1. Install necessary compilation tools
 
-First, you need to download XCode and SDK. You can install Xcode through your Mac’s app store.
+First, you need to download XCode and its SDK. You can install Xcode through your Mac’s app store.
 To ensure Metal is installed successfully, run this in command line:
 `xcrun metal`
 
@@ -86,17 +86,19 @@ Compile C++ metal code && M1 GPU kernel code
 make
 ```
 
-Run unit tests (Since currently we add `./python` to `sys.path` in pytest, you need to execute the command under project root e.g hw4, but you can add other paths as well)
+Then you can run unit tests (Since currently we add `./python` to `sys.path` in pytest, you need to execute the command under project root e.g hw4, but you can add other paths as well)
 
 Due to some reason that we don't understand, `test_rnn` and `test_lstm` must be run
 individually to complete. If we run them together with everything else, the test will get
 stuck.
 
+Run unit tests on everything except rnn, lstm, language_model_training:
+
 ```
 python3 -m pytest -v -k "not test_lstm and not test_rnn and not test_language_model_training"
 ```
 
-Run the following to test lstm and rnn individually.
+Run the following to test lstm and rnn individually:
 
 ```
 python3 -m pytest -v -k "test_lstm"
