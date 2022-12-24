@@ -5,7 +5,15 @@ project(needle C CXX)
 execute_process(COMMAND python3-config --prefix
   OUTPUT_VARIABLE Python_ROOT_DIR)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # added
-  find_package(Python3 3.9.12 EXACT COMPONENTS Development Interpreter REQUIRED) # or whatever python version is installed in conda env
+  execute_process(
+    COMMAND bash -c "python3 --version"
+    RESULT_VARIABLE _exit_code
+    OUTPUT_VARIABLE _python3_str
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    string(REPLACE " " ";" VERSION_LIST ${_python3_str})
+    list(GET VERSION_LIST 0 _Python)
+    list(GET VERSION_LIST 1 _python3_version)
+  find_package(Python3 ${_python3_version} EXACT COMPONENTS Development Interpreter REQUIRED) # or whatever python version is installed in conda env
 else()
   find_package(Python COMPONENTS Development Interpreter REQUIRED)
 endif()
