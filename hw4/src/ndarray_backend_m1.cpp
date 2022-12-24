@@ -20,8 +20,10 @@ namespace m1 {
 #define ALIGNMENT 256
 #define TILE 8
 
+// get the M1 GPU device
+MTL::Device *device = MTL::CreateSystemDefaultDevice();
 // Load the metal library and initialize the MetalOperations object.  
-MetalOperations *MetalOps = new MetalOperations(MTL::CreateSystemDefaultDevice());
+MetalOperations *MetalOps = new MetalOperations(device);
 
 // M1 is not like CUDA where we need to copy memory from CPU to GPU,
 // instead, M1 device has a shared buffer between CPU and GPU, and
@@ -29,9 +31,6 @@ MetalOperations *MetalOps = new MetalOperations(MTL::CreateSystemDefaultDevice()
 // to GPU, and vice versa.
 struct M1Array {
   M1Array(const size_t size) {
-    // get the M1 GPU device
-    device = MTL::CreateSystemDefaultDevice();
-
     // create a buffer with (size * ELEM_SIZE) bytes that is shared between CPU and GPU.
     array_MTL = device->newBuffer(size * ELEM_SIZE, MTL::ResourceStorageModeShared);
     assert(array_MTL != nullptr);
@@ -44,7 +43,6 @@ struct M1Array {
   size_t ptr_as_int() {return (size_t)ptr; }
   scalar_t* ptr;
   size_t size;
-  MTL::Device *device;
   MTL::Buffer *array_MTL;
 };
 
