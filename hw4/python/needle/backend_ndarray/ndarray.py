@@ -4,7 +4,6 @@ from functools import reduce
 import numpy as np
 from . import ndarray_backend_numpy
 from . import ndarray_backend_cpu
-from . import ndarray_backend_m1
 
 # math.prod not in Python 3.7
 def prod(x):

@@ -5,9 +5,10 @@ import numpy as np
 import pytest
 import torch
 import itertools
-import mugrade
+# import mugrade
 
 import needle as ndl
+from needle import backend_ndarray as nd
 import needle.nn as nn
 
 from simple_training import *
@@ -17,13 +18,17 @@ from models import LanguageModel
 np.random.seed(3)
 
 
-_DEVICES = [ndl.cpu(), pytest.param(ndl.cuda(),
-    marks=pytest.mark.skipif(not ndl.cuda().enabled(), reason="No GPU"))]
+_DEVICES = [nd.cpu(), 
+            pytest.param(nd.cuda(), marks=pytest.mark.skipif(not nd.cuda().enabled(), reason="No GPU")),
+            pytest.param(nd.m1(), marks=pytest.mark.skipif(not nd.m1().enabled(), reason="No M1 Chip"))]
 
 
-BATCH_SIZES = [1, 15]
-INPUT_SIZES = [1, 11]
-HIDDEN_SIZES = [1, 12]
+# BATCH_SIZES = [1, 15]
+# INPUT_SIZES = [1, 11]
+# HIDDEN_SIZES = [1, 12]
+BATCH_SIZES = [1, 2]
+INPUT_SIZES = [1, 3]
+HIDDEN_SIZES = [1, 2]
 BIAS = [True, False]
 INIT_HIDDEN = [True, False]
 NONLINEARITIES = ['tanh', 'relu']
@@ -33,7 +38,7 @@ NONLINEARITIES = ['tanh', 'relu']
 @pytest.mark.parametrize("bias", BIAS)
 @pytest.mark.parametrize("init_hidden", INIT_HIDDEN)
 @pytest.mark.parametrize("nonlinearity", NONLINEARITIES)
-@pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda"])
+@pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda", "m1"])
 def test_rnn_cell(batch_size, input_size, hidden_size, bias, init_hidden, nonlinearity, device):
     x = np.random.randn(batch_size, input_size).astype(np.float32)
     h0 = np.random.randn(batch_size, hidden_size).astype(np.float32)
@@ -66,7 +71,7 @@ def test_rnn_cell(batch_size, input_size, hidden_size, bias, init_hidden, nonlin
 @pytest.mark.parametrize("hidden_size", HIDDEN_SIZES)
 @pytest.mark.parametrize("bias", BIAS)
 @pytest.mark.parametrize("init_hidden", INIT_HIDDEN)
-@pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda"])
+@pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda", "m1"])
 def test_lstm_cell(batch_size, input_size, hidden_size, bias, init_hidden, device):
     x = np.random.randn(batch_size, input_size).astype(np.float32)
     h0 = np.random.randn(batch_size, hidden_size).astype(np.float32)
@@ -98,7 +103,8 @@ def test_lstm_cell(batch_size, input_size, hidden_size, bias, init_hidden, devic
     np.testing.assert_allclose(model_.weight_ih.grad.detach().numpy().transpose(), model.W_ih.grad.numpy(), atol=1e-5, rtol=1e-5)
 
 
-SEQ_LENGTHS = [1, 13]
+# SEQ_LENGTHS = [1, 13]
+SEQ_LENGTHS = [1, 3]
 NUM_LAYERS = [1, 2]
 @pytest.mark.parametrize("seq_length", SEQ_LENGTHS)
 @pytest.mark.parametrize("num_layers", NUM_LAYERS)
@@ -108,7 +114,7 @@ NUM_LAYERS = [1, 2]
 @pytest.mark.parametrize("bias", BIAS)
 @pytest.mark.parametrize("init_hidden", INIT_HIDDEN)
 @pytest.mark.parametrize("nonlinearity", NONLINEARITIES)
-@pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda"])
+@pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda", "m1"])
 def test_rnn(seq_length, num_layers, batch_size, input_size, hidden_size, bias, init_hidden, nonlinearity, device):
     x = np.random.randn(seq_length, batch_size, input_size).astype(np.float32)
     h0 = np.random.randn(num_layers, batch_size, hidden_size).astype(np.float32)
@@ -146,7 +152,7 @@ def test_rnn(seq_length, num_layers, batch_size, input_size, hidden_size, bias, 
 @pytest.mark.parametrize("hidden_size", HIDDEN_SIZES)
 @pytest.mark.parametrize("bias", BIAS)
 @pytest.mark.parametrize("init_hidden", INIT_HIDDEN)
-@pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda"])
+@pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda", "m1"])
 def test_lstm(seq_length, num_layers, batch_size, input_size, hidden_size, bias, init_hidden, device):
     x = np.random.randn(seq_length, batch_size, input_size).astype(np.float32)
     h0 = np.random.randn(num_layers, batch_size, hidden_size).astype(np.float32)
@@ -181,7 +187,8 @@ def test_lstm(seq_length, num_layers, batch_size, input_size, hidden_size, bias,
 
 OUTPUT_SIZES = [1, 1000]
 EMBEDDING_SIZES = [1, 34]
-SEQ_MODEL = ['rnn', 'lstm']
+# SEQ_MODEL = ['rnn', 'lstm']
+SEQ_MODEL = ['rnn']
 @pytest.mark.parametrize("seq_length", SEQ_LENGTHS)
 @pytest.mark.parametrize("num_layers", NUM_LAYERS)
 @pytest.mark.parametrize("batch_size", BATCH_SIZES)
@@ -190,7 +197,7 @@ SEQ_MODEL = ['rnn', 'lstm']
 @pytest.mark.parametrize("init_hidden", INIT_HIDDEN)
 @pytest.mark.parametrize("output_size", OUTPUT_SIZES)
 @pytest.mark.parametrize("seq_model", SEQ_MODEL)
-@pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda"])
+@pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda", "m1"])
 def test_language_model_implementation(seq_length, num_layers, batch_size, embedding_size, hidden_size,
                         init_hidden, output_size, seq_model, device):
     #TODO add test for just nn.embedding?
@@ -221,7 +228,7 @@ def test_language_model_implementation(seq_length, num_layers, batch_size, embed
     for p in model.parameters():
         assert p.grad is not None
 
-@pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda"])
+@pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda", "m1"])
 def test_language_model_training(device):
     np.random.seed(0)
     corpus = ndl.data.Corpus("data/ptb", max_lines=20)
