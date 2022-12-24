@@ -29,10 +29,6 @@ MetalOperations *MetalOps = new MetalOperations(MTL::CreateSystemDefaultDevice()
 // to GPU, and vice versa.
 struct M1Array {
   M1Array(const size_t size) {
-    // get the enough memory for the CPU version of the buffer.
-    int ret = posix_memalign((void**)&ptr, ALIGNMENT, size * ELEM_SIZE);
-    if (ret != 0) throw std::bad_alloc();
-
     // get the M1 GPU device
     device = MTL::CreateSystemDefaultDevice();
 
