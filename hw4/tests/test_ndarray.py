@@ -89,7 +89,7 @@ def test_reduce_sum(params, device):
     dims, axis = params['dims'], params['axis']
     _A = np.random.randn(*dims)
     A = nd.array(_A, device=device)   
-    np.testing.assert_allclose(_A.sum(axis=axis, keepdims=True), A.sum(axis=axis).numpy(), atol=1e-5, rtol=1e-5)
+    np.testing.assert_allclose(_A.sum(axis=axis), A.sum(axis=axis).numpy(), atol=1e-5, rtol=1e-5)
 
 
 @pytest.mark.parametrize("device", _DEVICES, ids=["cpu", "cuda", "m1"])
@@ -106,7 +106,7 @@ def test_reduce_max(params, device):
     # print(_A.max(axis=axis, keepdims=True))
     # print("A.max(axis=axis).numpy():")
     # print(A.max(axis=axis).numpy())
-    np.testing.assert_allclose(_A.max(axis=axis, keepdims=True), A.max(axis=axis).numpy(), atol=1e-5, rtol=1e-5)
+    np.testing.assert_allclose(_A.max(axis=axis), A.max(axis=axis).numpy(), atol=1e-5, rtol=1e-5)
 
 
 """ For converting slice notation to slice objects to make some proceeding tests easier to read """
