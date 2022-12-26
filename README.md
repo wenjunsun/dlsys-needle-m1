@@ -113,12 +113,6 @@ cd hw4
 python3 benchmark_matmul.py
 ```
 
-You should see something like the following
-
-``` txt
-for matmul with parameters: {'m': 4000, 'n': 4000, 'p': 4000, 'device': cpu()}
-it takes 4.8514 seconds to do matrix multiplication
-
-for matmul with parameters: {'m': 4000, 'n': 4000, 'p': 4000, 'device': m1()}
-it takes 1.9572 seconds to do matrix multiplication
-```
+You should see the following plots that compare the matrix multiplication speed on m1 vs cpu. As we can see, for matrices with size bigger than 100, m1 consistently have ~3x speedup comparing to cpu. In some cases such as when matrix size is 2500, m1 achieves 70x speedup comparing to cpu! (this is likely due to cache misses in the CPU for loop)
+![matmul duration comparison](matmul_duration_comparison.png)
+![matmul speedup](matmul_speedup.png)
