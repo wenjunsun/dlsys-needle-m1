@@ -5,3 +5,5 @@ dependencies:
   - pybind11
   - pytest
   - pytorch
+  - matplotlib
+  - pandas
