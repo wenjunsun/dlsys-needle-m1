@@ -49,7 +49,7 @@ list(APPEND LINKER_LIBS ${pybind11_LIBRARIES})
 ###################
 ### CPU BACKEND ###
 ###################
-add_library(ndarray_backend_cpu MODULE src/ndarray_backend_cpu.cc)
+add_library(ndarray_backend_cpu MODULE ndarray_backend/ndarray_backend_cpu.cc)
 target_link_libraries(ndarray_backend_cpu PUBLIC ${LINKER_LIBS})
 pybind11_extension(ndarray_backend_cpu)
 pybind11_strip(ndarray_backend_cpu)
@@ -58,7 +58,7 @@ pybind11_strip(ndarray_backend_cpu)
 # directly output to ffi folder
 set_target_properties(ndarray_backend_cpu
   PROPERTIES
-  LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python/needle/backend_ndarray
+  LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/needle/backend_ndarray
   CXX_VISIBILITY_PRESET "hidden"
 )
 
@@ -77,8 +77,8 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   find_library(METAL Metal)
   find_library(FOUNDATION Foundation)
   find_library(METALKIT MetalKit)
-  add_library(ndarray_backend_m1 MODULE src/ndarray_backend_m1.cpp src/MetalOperations.cpp src/MetalOperations.hpp)
-  target_include_directories(ndarray_backend_m1 PRIVATE ../metal-cpp)
+  add_library(ndarray_backend_m1 MODULE ndarray_backend/ndarray_backend_m1.cpp ndarray_backend/MetalOperations.cpp ndarray_backend/MetalOperations.hpp)
+  target_include_directories(ndarray_backend_m1 PRIVATE ./metal-cpp)
   target_link_libraries(ndarray_backend_m1 PUBLIC ${LINKER_LIBS} ${METAL} ${FOUNDATION} ${METALKIT})
   target_compile_options(ndarray_backend_m1 PRIVATE -std=c++17 -stdlib=libc++ -O2 -fno-objc-arc)
   pybind11_extension(ndarray_backend_m1)
@@ -88,7 +88,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   # directly output to ffi folder
   set_target_properties(ndarray_backend_m1
     PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python/needle/backend_ndarray
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/needle/backend_ndarray
     CXX_VISIBILITY_PRESET "hidden"
   )
 
@@ -116,7 +116,7 @@ if(CUDA_FOUND)
   endif()
 
   # set arch flags properly
-  CUDA_ADD_LIBRARY(ndarray_backend_cuda MODULE src/ndarray_backend_cuda.cu OPTIONS ${ARCH_FLAGS})
+  CUDA_ADD_LIBRARY(ndarray_backend_cuda MODULE ndarray_backend/ndarray_backend_cuda.cu OPTIONS ${ARCH_FLAGS})
 
   target_link_libraries(ndarray_backend_cuda ${LINKER_LIBS})
   pybind11_extension(ndarray_backend_cuda)
@@ -125,7 +125,7 @@ if(CUDA_FOUND)
   # directly output to ffi folder
   set_target_properties(ndarray_backend_cuda
     PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python/needle/backend_ndarray
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/needle/backend_ndarray
     CXX_VISIBILITY_PRESET "hidden"
     CUDA_VISIBILITY_PRESET "hidden"
 )

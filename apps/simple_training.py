@@ -1,5 +1,3 @@
-import sys
-sys.path.append('../python')
 import needle as ndl
 import needle.nn as nn
 from needle import backend_ndarray as nd

@@ -1,5 +1,4 @@
 import sys
-sys.path.append('./python')
 sys.path.append('./apps')
 import numpy as np
 import pytest

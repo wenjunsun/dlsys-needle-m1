@@ -1,5 +1,3 @@
-import sys
-sys.path.append('./python')
 import itertools
 import numpy as np
 import pytest

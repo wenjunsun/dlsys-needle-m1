@@ -44,7 +44,7 @@ MetalOperations::MetalOperations(MTL::Device *device)
 
     // Load the shader files with a .metal file extension in the project
     std::string s1 = CUR_ROOT_DIR;
-    std::string s2 = "/python/needle/backend_ndarray/";
+    std::string s2 = "/build/";
     std::string s3 = "ops.metallib";
     std::string libpath = s1 + s2 + s3;
     auto filepath = NS::String::string(libpath.c_str(), NS::ASCIIStringEncoding);
