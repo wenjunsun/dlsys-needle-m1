@@ -207,19 +207,108 @@ kernel void ewise_tanh(device const scalar_t* a [[buffer(0)]],
 // Matrix mulplication
 ////////////////////////////////////////////////////////////////////////////////
 
-kernel void matmul(device const scalar_t* a [[buffer(0)]],
-                   device const scalar_t* b [[buffer(1)]],
-                   device scalar_t* out     [[buffer(2)]],
-                   device const uint32_t* N [[buffer(3)]],
-                   device const uint32_t* P [[buffer(4)]],
-                   uint2 index              [[thread_position_in_grid]])
+kernel void matmul_naive(device const scalar_t* a [[buffer(0)]],
+                         device const scalar_t* b [[buffer(1)]],
+                         device scalar_t* out     [[buffer(2)]],
+                         device const uint32_t* M [[buffer(3)]],
+                         device const uint32_t* N [[buffer(4)]],
+                         device const uint32_t* P [[buffer(5)]],
+                         uint2 index              [[thread_position_in_grid]])
 {
-    int32_t i = index.x, j = index.y, n = (*N), p = (*P);
+    int32_t j = index.x, i = index.y, m = (*M), n = (*N), p = (*P);
 
-    out[i * p + j] = 0;
-    for (int k = 0; k < n; k++) {
-      out[i * p + j] += a[i * n + k] * b[k * p + j];
-    }    
+    // Check if the thread is in-bounds.
+    if ((i < m) && (j < p)) {
+        scalar_t sum = 0;
+        for (int k = 0; k < n; k++) {
+            // a[i][k], b[k][j]
+            sum += a[n * i + k] * b[k * p + j];
+        }    
+        // out[i][j]
+        out[i * p + j] = sum;
+    }
+}
+
+kernel void matmul_block(device const scalar_t* A [[buffer(0)]],
+                         device const scalar_t* B [[buffer(1)]],
+                         device scalar_t* out     [[buffer(2)]],
+                         device const uint32_t* M [[buffer(3)]],
+                         device const uint32_t* N [[buffer(4)]],
+                         device const uint32_t* P [[buffer(5)]],
+                         uint2 threadgroup_pos [[ threadgroup_position_in_grid ]],
+                         uint2 local_thread_idx [[ thread_position_in_threadgroup ]])
+{
+    // Note: be sure that this is set to the same value as "threads per group" in the calling code!
+    const int BLOCK_SIZE = 8;
+
+    const uint32_t wB = (*P);
+    const uint32_t wA = (*N);
+    
+    // Block index
+    const uint bx = threadgroup_pos.x;
+    const uint by = threadgroup_pos.y;
+    
+    // Thread index
+    const uint tx =local_thread_idx.x;
+    const uint ty =local_thread_idx.y;
+    
+    // Index of the first sub-matrix of A processed by the block
+    const uint aBegin = wA * BLOCK_SIZE * by;
+
+    // Index of the last sub-matrix of A processed by the block
+    const uint aEnd   = aBegin + wA - 1;
+
+    // Step size used to iterate through the sub-matrices of A
+    const uint aStep  = BLOCK_SIZE;
+
+    // Index of the first sub-matrix of B processed by the block
+    const uint bBegin = BLOCK_SIZE * bx;
+
+    // Step size used to iterate through the sub-matrices of B
+    const uint bStep  = BLOCK_SIZE * wB;
+
+    // Csub is used to store the element of the block sub-matrix
+    // that is computed by the thread
+    scalar_t Csub = 0;
+    
+    // Loop over all the sub-matrices of A and B
+    // required to compute the block sub-matrix
+    for (uint a = aBegin, b = bBegin;
+        a <= aEnd;
+        a += aStep, b += bStep) {
+        // Declaration of the shared memory array As used to
+        // store the sub-matrix of A
+        threadgroup float As[BLOCK_SIZE][BLOCK_SIZE];
+        
+
+        // Declaration of the shared memory array Bs used to
+        // store the sub-matrix of B
+        threadgroup float Bs[BLOCK_SIZE][BLOCK_SIZE];
+
+        // Load the matrices from device memory
+        // to shared memory; each thread loads
+        // one element of each matrix
+        As[ty][tx] = A[a + wA * ty + tx];
+        Bs[ty][tx] = B[b + wB * ty + tx];
+
+        // Synchronize to make sure the matrices are loaded
+        threadgroup_barrier(mem_flags::mem_none);
+
+        // Multiply the two matrices together;
+        // each thread computes one element
+        // of the block sub-matrix
+        for (int k = 0; k < BLOCK_SIZE; ++k) {
+            Csub += As[ty][k] * Bs[k][tx];
+        }
+
+        // Synchronize to make sure that the preceding
+        // computation is done before loading two new
+        // sub-matrices of A and B in the next iteration
+        threadgroup_barrier(mem_flags::mem_none);
+      }
+
+    const int c = wB * BLOCK_SIZE * by + BLOCK_SIZE * bx;
+    out[c + wB * ty + tx] = Csub; 
 }
 
 

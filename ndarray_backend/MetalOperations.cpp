@@ -146,19 +146,19 @@ void MetalOperations::Blocking2D(std::vector<MTL::Buffer *> buffers,
         computeEncoder->setBuffer(buffers[i], 0, i);
     }
 
-    NS::UInteger threadGroupSize =
-        functionPipelineMap[method]->maxTotalThreadsPerThreadgroup();
-
-    if (threadGroupSize > rows)
-        threadGroupSize = rows;
-
-    // aspect ratio of kernel operation is threadGroupSize:1
-    MTL::Size threadgroupSize = MTL::Size::Make(1, threadGroupSize / 1, 1);
-
-    MTL::Size gridSize = MTL::Size::Make(rows, columns, 1);
+    // Both of these values must be the same!
+    const int x_threads_per_group = 8;
+    const int y_threads_per_group = 8;
+    assert(x_threads_per_group == y_threads_per_group);
+    
+    // The number of thread groups (i.e., blocks) per grid.
+    const int x_group_count = (columns + x_threads_per_group - 1) / x_threads_per_group;
+    const int y_group_count = (rows + y_threads_per_group - 1) / y_threads_per_group;
+    MTL::Size thread_group_count = MTL::Size::Make(x_group_count, y_group_count, 1);
+    MTL::Size threadgroupSize = MTL::Size::Make(x_threads_per_group, y_threads_per_group, 1);
+    computeEncoder->dispatchThreadgroups(thread_group_count, threadgroupSize);
 
     // Encode the compute command.
-    computeEncoder->dispatchThreads(gridSize, threadgroupSize);
     computeEncoder->endEncoding();
 
     commandBuffer->commit();
@@ -295,10 +295,12 @@ void MetalOperations::MatMul(MTL::Buffer *a,
                              uint32_t P,
                              const char *method)
 {
+    auto M_buffer = ScalarToMTLBuffer(M, _mDevice);
     auto N_buffer = ScalarToMTLBuffer(N, _mDevice);
     auto P_buffer = ScalarToMTLBuffer(P, _mDevice);
-    std::vector<MTL::Buffer *> buffers = {a, b, out, N_buffer, P_buffer};
+    std::vector<MTL::Buffer *> buffers = {a, b, out, M_buffer, N_buffer, P_buffer};
     Blocking2D(buffers, M, P, method);
+    M_buffer->release();
     N_buffer->release();
     P_buffer->release();
 }

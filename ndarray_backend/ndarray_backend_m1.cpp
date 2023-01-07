@@ -145,7 +145,7 @@ void EwiseTanh(const M1Array& a, M1Array* out) {
 // Matrix mulplication
 ////////////////////////////////////////////////////////////////////////////////
 void Matmul(const M1Array& a, const M1Array& b, M1Array* out, uint32_t M, uint32_t N, uint32_t P) {
-  MetalOps->MatMul(a.array_MTL, b.array_MTL, out->array_MTL, M, N, P, "matmul");
+  MetalOps->MatMul(a.array_MTL, b.array_MTL, out->array_MTL, M, N, P, "matmul_naive");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
