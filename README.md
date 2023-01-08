@@ -97,7 +97,8 @@ python3 -m pytest -v -k "m1"
 python3 apps/benchmark_matmul.py
 ```
 
-You should see the following plots that compare the matrix multiplication speed on m1 vs cpu. As we can see, for matrices with size bigger than 100, m1 consistently have ~3x speedup comparing to cpu. In some cases such as when matrix size is 2500, m1 achieves 70x speedup comparing to cpu! (this is likely due to cache misses in the CPU for loop)
+- You should see the following plots that compare the matrix multiplication speed on m1 vs cpu. As we can see, for matrices with size bigger than 100, m1 consistently have ~3x speedup comparing to cpu. In some cases such as when matrix size is 2500, m1 achieves 70x speedup comparing to cpu!
+    - this is likely due to the reason that the tile size is set to 8 for our CPU matrix multiplication code, so CPU matrix multiplication is significantly slower for matrix whose size is not a multiple of 8 (e.g. 500, 900, 1500, 2500). Thus the speedup number for matrix size of 500, 900, 1500, 2500 seems huge, not because M1 is being very fast on these matrix sizes, but because CPU is being very slow on these matrix sizes.
 
 ![matmul duration comparison](./figures/matmul_duration_comparison.png)
 ![matmul speedup](./figures/matmul_speedup.png)
